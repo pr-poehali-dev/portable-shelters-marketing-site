@@ -1,6 +1,9 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import AnimatedSection from "@/components/AnimatedSection";
 import { HERO_IMAGE, PRODUCTS, PORTFOLIO_ITEMS, STATS, NAV_ITEMS } from "@/components/constants";
+
+const SEND_ORDER_URL = "https://functions.poehali.dev/c193f825-eeab-48b2-ba2d-fe6490f15437";
 
 interface ScrollProps {
   onScrollTo: (id: string) => void;
@@ -278,6 +281,34 @@ export function CtaSection({ onScrollTo }: ScrollProps) {
 }
 
 export function ContactsSection() {
+  const [form, setForm] = useState({ name: "", phone: "", category: "", comment: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.phone.trim()) return;
+    setStatus("loading");
+    try {
+      const res = await fetch(SEND_ORDER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setForm({ name: "", phone: "", category: "", comment: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  };
+
   return (
     <section id="contacts" className="py-24 bg-[#1A1614]">
       <div className="max-w-7xl mx-auto px-6">
@@ -293,8 +324,8 @@ export function ContactsSection() {
 
             <div className="space-y-8">
               {[
-                { icon: "Phone", label: "Телефон", content: <a href="tel:+73462000000" className="text-white text-xl font-semibold hover:text-[#E8824A] transition-colors">+7 (3462) 00-00-00</a> },
-                { icon: "Mail", label: "Email", content: <a href="mailto:info@severpolimer.ru" className="text-white text-xl font-semibold hover:text-[#E8824A] transition-colors">info@severpolimer.ru</a> },
+                { icon: "Phone", label: "Телефон", content: <a href="tel:+79042715233" className="text-white text-xl font-semibold hover:text-[#E8824A] transition-colors">+7 (904) 271-52-33</a> },
+                { icon: "Mail", label: "Email", content: <a href="mailto:565233@mail.ru" className="text-white text-xl font-semibold hover:text-[#E8824A] transition-colors">565233@mail.ru</a> },
                 { icon: "MapPin", label: "Адрес производства", content: <div className="text-white text-lg font-semibold leading-relaxed">ХМАО–Югра, г. Сургут<br />ул. Промышленная, д. 1</div> },
                 { icon: "Clock", label: "Режим работы", content: <div><div className="text-white text-lg font-semibold">Пн–Пт: 8:00 – 18:00</div><div className="text-white/60 text-sm">Сб–Вс: по договорённости</div></div> },
               ].map((item, i) => (
@@ -311,10 +342,10 @@ export function ContactsSection() {
             </div>
 
             <div className="flex gap-4 mt-10">
-              <a href="#" className="w-10 h-10 border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white transition-colors">
+              <a href="https://vk.com/im/convo/-55092442?entrypoint=community_page&tab=all" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white transition-colors">
                 <Icon name="MessageCircle" size={18} />
               </a>
-              <a href="#" className="w-10 h-10 border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white transition-colors">
+              <a href="https://t.me/+79042715233" target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white transition-colors">
                 <Icon name="Send" size={18} />
               </a>
             </div>
@@ -325,49 +356,96 @@ export function ContactsSection() {
               <h3 className="font-display text-2xl font-bold text-white uppercase tracking-wide mb-8">
                 Оставить заявку
               </h3>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Ваше имя</label>
-                  <input
-                    type="text"
-                    placeholder="Иван Иванов"
-                    className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors"
-                  />
+
+              {status === "success" ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-[#E8824A]/20 flex items-center justify-center mx-auto mb-5">
+                    <Icon name="CheckCircle" size={32} className="text-[#E8824A]" />
+                  </div>
+                  <div className="font-display text-2xl text-white uppercase font-bold mb-3">Заявка отправлена!</div>
+                  <p className="text-white/50 text-sm leading-relaxed">Перезвоним в течение 15 минут в рабочее время</p>
+                  <button
+                    onClick={() => setStatus("idle")}
+                    className="mt-8 text-[#E8824A] text-sm uppercase tracking-wider hover:underline"
+                  >
+                    Отправить ещё
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Телефон</label>
-                  <input
-                    type="tel"
-                    placeholder="+7 (000) 000-00-00"
-                    className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Что вас интересует?</label>
-                  <select className="w-full bg-[#1A1614] border border-white/20 text-white px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors">
-                    <option value="">Выберите направление</option>
-                    <option>Бытовки</option>
-                    <option>Дома</option>
-                    <option>Блок-контейнеры</option>
-                    <option>Бани</option>
-                    <option>Хозблоки</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Комментарий</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Размеры, количество, особые требования..."
-                    className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors resize-none"
-                  />
-                </div>
-                <button className="w-full bg-[#E8824A] text-white py-4 font-display text-sm uppercase tracking-wider font-bold hover:bg-[#D4703A] transition-colors">
-                  Отправить заявку
-                </button>
-                <p className="text-white/30 text-xs text-center leading-relaxed">
-                  Нажимая кнопку, вы соглашаетесь с политикой обработки персональных данных
-                </p>
-              </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Ваше имя *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Иван Иванов"
+                      required
+                      className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Телефон *</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+7 (000) 000-00-00"
+                      required
+                      className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Что вас интересует?</label>
+                    <select
+                      name="category"
+                      value={form.category}
+                      onChange={handleChange}
+                      className="w-full bg-[#1A1614] border border-white/20 text-white px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors"
+                    >
+                      <option value="">Выберите направление</option>
+                      <option>Бытовки</option>
+                      <option>Дома</option>
+                      <option>Блок-контейнеры</option>
+                      <option>Бани</option>
+                      <option>Хозблоки</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">Комментарий</label>
+                    <textarea
+                      name="comment"
+                      value={form.comment}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder="Размеры, количество, особые требования..."
+                      className="w-full bg-white/5 border border-white/20 text-white placeholder:text-white/30 px-4 py-3.5 focus:outline-none focus:border-[#E8824A] transition-colors resize-none"
+                    />
+                  </div>
+
+                  {status === "error" && (
+                    <p className="text-red-400 text-sm text-center">Ошибка отправки. Позвоните нам напрямую.</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="w-full bg-[#E8824A] text-white py-4 font-display text-sm uppercase tracking-wider font-bold hover:bg-[#D4703A] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {status === "loading" ? (
+                      <>
+                        <Icon name="Loader" size={16} className="animate-spin" />
+                        Отправляем...
+                      </>
+                    ) : "Отправить заявку"}
+                  </button>
+                  <p className="text-white/30 text-xs text-center leading-relaxed">
+                    Нажимая кнопку, вы соглашаетесь с политикой обработки персональных данных
+                  </p>
+                </form>
+              )}
             </div>
           </AnimatedSection>
         </div>
